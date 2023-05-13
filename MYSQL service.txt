@@ -1,0 +1,32 @@
+## Подготовка стэнда с БД:
+* Скачать и распаковать mysql8.2 в папку C:\MySQL
+* Cоздать пустые директории MySQL\MySQLServer8\instances\preprod и MySQL\MySQLServer8\instances\test
+* Инициализируем обе директории data
+cd (C:\MySQL\MySQLServer8)
+bin\mysqld.exe --initialize --datadir="C:\MySql\MySQLServer8\instances\preprod" --port=3306 --explicit_defaults_for_timestamp
+bin\mysqld.exe --initialize --datadir="C:\MySql\MySQLServer8\instances\test" --port=3307 --explicit_defaults_for_timestamp
+* Проверить, что в файлах MySQLServer8\instances\<DB>\<host>.err нет ошибок и там написан пароль для root по умолчанию.
+* Взять из репозитория два конфигурационных файла: my-preprod.ini и my-test.ini
+* Устанавить две службы
+bin\mysqld.exe --install mysqldpreprod --defaults-file="C:\MySQL\my-preprod.ini"
+bin\mysqld.exe --install mysqldtest --defaults-file="C:\MySQL\my-test.ini"
+* Запустить обе службы
+* Проверить, что В журналах системы windows нет ошибок
+* Проверить подключение
+mysql.exe --port=3306 -u root -p
+* Изменить пароль
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Ввести пароль';
+* Проверить работу, для этого надо выполнить какую-либо команду
+SHOW DATABASES;
+* Повторить для стенда test:
+mysql.exe --port=3307 -u root -p
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Ввести пароль';
+SHOW DATABASES;
+* Аналогично проверить подключение с другого хоста.
+* Отключить режим работы БД ONLY_FULL_GROUP_BY. Для этого выполнить команду от root
+SELECT @@GLOBAL.sql_mode;
+И проверить, что в результате нет строки ONLY_FULL_GROUP_BY. Если есть, то установить другой те же режимы, но без последнего командой:
+SET GLOBAL sql_mode = 'modes';
+* Аналогично повторить для сессии командами:
+SELECT @@SESSION.sql_mode;
+SET SESSION sql_mode = 'modes';
